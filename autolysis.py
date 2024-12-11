@@ -20,7 +20,7 @@ import io
 data = dict()
 
 
-df = pd.read_csv(sys.argv[1])
+df = pd.read_csv(sys.argv[1],encoding='utf-8')
 column_name = random.choice(df.describe().columns)
 
 data['statistics'] = json.loads((df.describe().to_json()))[column_name]
