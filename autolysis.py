@@ -19,8 +19,11 @@ import traceback
 import io
 data = dict()
 
+filename = sys.argv[1]
+folder  = '.'.join(filename.split('.')[0:-1])
 
-df = pd.read_csv(sys.argv[1],encoding_errors='ignore')
+os.makedirs(name=folder,exist_ok=True)
+df = pd.read_csv(filename,encoding_errors='ignore')
 column_name = random.choice(df.describe().columns)
 
 data['statistics'] = json.loads((df.describe().to_json()))[column_name]
@@ -186,10 +189,13 @@ while flag and limit < 3:
     finally : 
         limit += 1
 
-image_path = json.loads(r.json()['choices'][0]['message']['function_call']['arguments'])['chart_name']
+chart_name = json.loads(r.json()['choices'][0]['message']['function_call']['arguments'])['chart_name']
 # image_path = 'original_publication_year_distribution.png'
+src = os.path.join(os.getcwd(),chart_name)
+dest = os.path.join(os.getcwd(),folder,chart_name)
+# image_path = src
 
-
+os.rename(src,dest)
 
 import base64
 
@@ -199,7 +205,7 @@ def encode_image(image_path):
         return base64.b64encode(image_file.read()).decode("utf-8")
     
 
-base64_image = encode_image(image_path)
+base64_image = encode_image(dest)
 
 json_data = {
     "model":"gpt-4o-mini",
@@ -224,6 +230,6 @@ json_data = {
 
 r = requests.post(url=url,headers=headers,json=json_data)
 
-with open(file='Readme.md',encoding='utf-8',mode='a') as f:
+with open(file=f'{folder}/Readme.md',encoding='utf-8',mode='a') as f:
     f.write(r.json()['choices'][0]['message']['content'])
 print(r.json())
